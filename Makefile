@@ -111,29 +111,29 @@ pcd_write/fast:
 	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/build
 .PHONY : pcd_write/fast
 
-point_cloud.o: point_cloud.cpp.o
-.PHONY : point_cloud.o
+intrepid_pcl.o: intrepid_pcl.cpp.o
+.PHONY : intrepid_pcl.o
 
 # target to build an object file
-point_cloud.cpp.o:
-	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/point_cloud.cpp.o
-.PHONY : point_cloud.cpp.o
+intrepid_pcl.cpp.o:
+	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/intrepid_pcl.cpp.o
+.PHONY : intrepid_pcl.cpp.o
 
-point_cloud.i: point_cloud.cpp.i
-.PHONY : point_cloud.i
+intrepid_pcl.i: intrepid_pcl.cpp.i
+.PHONY : intrepid_pcl.i
 
 # target to preprocess a source file
-point_cloud.cpp.i:
-	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/point_cloud.cpp.i
-.PHONY : point_cloud.cpp.i
+intrepid_pcl.cpp.i:
+	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/intrepid_pcl.cpp.i
+.PHONY : intrepid_pcl.cpp.i
 
-point_cloud.s: point_cloud.cpp.s
-.PHONY : point_cloud.s
+intrepid_pcl.s: intrepid_pcl.cpp.s
+.PHONY : intrepid_pcl.s
 
 # target to generate assembly for a file
-point_cloud.cpp.s:
-	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/point_cloud.cpp.s
-.PHONY : point_cloud.cpp.s
+intrepid_pcl.cpp.s:
+	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/intrepid_pcl.cpp.s
+.PHONY : intrepid_pcl.cpp.s
 
 # Help Target
 help:
@@ -144,9 +144,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... pcd_write"
 	@echo "... rebuild_cache"
-	@echo "... point_cloud.o"
-	@echo "... point_cloud.i"
-	@echo "... point_cloud.s"
+	@echo "... intrepid_pcl.o"
+	@echo "... intrepid_pcl.i"
+	@echo "... intrepid_pcl.s"
 .PHONY : help
 
 

@@ -8,6 +8,6 @@ find_package(PCL 1.7 REQUIRED)
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 
-add_executable (pcd_write point_cloud.cpp)
+add_executable (pcd_write intrepid_pcl.cpp)
 target_link_libraries (pcd_write ${PCL_LIBRARIES})
 
