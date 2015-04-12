@@ -1,4 +1,0 @@
-Num of data points: 370600
-Saved input of 370600 data points to out/pre-processed
-Stats filtered cloud is now 350419
-Voxel filtered cloud is now 238178
