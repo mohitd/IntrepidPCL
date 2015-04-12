@@ -1,0 +1,5 @@
+Num of data points: 370600
+Saved input of 370600 data points to out/pre-processed
+Stats filtered cloud is now 343383
+Voxel filtered cloud is now 231116
+Saved final mesh to out/mesh.vtk
