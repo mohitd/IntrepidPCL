@@ -81,8 +81,8 @@ int main(int argc, char const *argv[])
 	// create the filtering object
 	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
   	sor.setInputCloud (cloud2);
-  	sor.setMeanK (1000); // analyzes 1000 neighbors
-  	sor.setStddevMulThresh (1.0); // remove all points who have a distance larger than 1 standard deviation of the mean distance 							
+  	sor.setMeanK (200); // analyzes 1000 neighbors
+  	sor.setStddevMulThresh (0.3); // remove all points who have a distance larger than 1 standard deviation of the mean distance
   	sor.filter (*cloud_filtered); // query point will be marked as outliers and removed
   	
   	std::cout << "Stats filtered cloud is now " << cloud_filtered->points.size() << std::endl;
@@ -90,7 +90,7 @@ int main(int argc, char const *argv[])
 
   	pcl::VoxelGrid<pcl::PointXYZ> voxelFilter;
   	voxelFilter.setInputCloud(cloud_filtered);
-  	voxelFilter.setLeafSize(0.01f, 0.01f, 0.01f);	// create voxels of side length .01m
+  	voxelFilter.setLeafSize(0.01f, 0.01f, 0.01f);	// create voxels of side length 1cm (0.01m)
   	voxelFilter.filter(*cloud_filtered2);
 	
 	std::cout << "Voxel filtered cloud is now " << cloud_filtered2->points.size() << std::endl;
