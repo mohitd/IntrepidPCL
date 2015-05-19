@@ -57,7 +57,7 @@ void print_help(char **argv)
   	print_value("%d", default_leaf_size); print_info(")\n");
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
 	if (argc < 2) 
 	{
@@ -120,9 +120,8 @@ int main(int argc, char const *argv[])
 	}
 
 	fin.close();
-	
 	savePCDFileASCII("out/pre-processed.pcd", cloud);
-	std::cout << "Saved input of " << cloud.points.size() << " data points to out/pre-processed" << std::endl;
+	print_highlight("Saving "); print_value("%s", "pre-processed.pcd");
 	
 	/** Statistical Outlier Removal */
 	PointCloud<PointXYZ>::Ptr cloud2 (new PointCloud<PointXYZ>(cloud));
@@ -132,8 +131,8 @@ int main(int argc, char const *argv[])
 	// create the filtering object
 	StatisticalOutlierRemoval<PointXYZ> sor;
   	sor.setInputCloud (cloud2);
-  	sor.setMeanK(mean_k); // analyzes 1000 neighbors
-  	sor.setStddevMulThresh(stdev); // remove all points who have a distance larger than 1 standard deviation of the mean distance
+  	sor.setMeanK(mean_k); // analyzes mean_k neighbors
+  	sor.setStddevMulThresh(stdev); // remove all points who have a distance larger than stdev standard deviation of the mean distance
 
   	TicToc tt1;
   	tt1.tic();
@@ -141,17 +140,22 @@ int main(int argc, char const *argv[])
   	sor.filter(*cloud_filtered); // query point will be marked as outliers and removed
   	print_info("[done, "); print_value("%g", tt1.toc ()); print_info(" ms]\n");
   	
-  	std::cout << "Stats filtered cloud is now " << cloud_filtered->points.size() << std::endl;
+  	print_info("Stats filtered cloud is now "); print_value("%d\n", cloud_filtered->points.size());
 
   	VoxelGrid<PointXYZ> voxelFilter;
   	voxelFilter.setInputCloud(cloud_filtered);
-  	voxelFilter.setLeafSize(leaf_size, leaf_size, leaf_size);	// create voxels of side length 1cm (0.01m)
+  	voxelFilter.setLeafSize(leaf_size, leaf_size, leaf_size);	// create voxels of leaf_size
+
+  	TicToc tt2;
+  	tt2.tic();
+  	print_highlight("Computing VoxelGridFilter ");
   	voxelFilter.filter(*cloud_filtered2);
+  	print_info("[done, "); print_value("%g", tt2.toc ()); print_info(" ms]\n");
 	
-	std::cout << "Voxel filtered cloud is now " << cloud_filtered2->points.size() << std::endl;
+	print_info("Voxel filtered cloud is now "); print_value("%d\n", cloud_filtered2->points.size());
 
 	savePCDFileASCII("out/post-processed.pcd", *cloud_filtered2);
-	std::cout << "Saved input of " << cloud_filtered2->points.size() << " data points to out/post-processed" << std::endl;
+	print_highlight("Saving "); print_value("%s", "post-processed.pcd");
 
 	/** Estimating the surface normals */
 	NormalEstimation<PointXYZ, Normal> ne;
@@ -172,7 +176,7 @@ int main(int argc, char const *argv[])
   	// cloud_with_normals = cloud + normals
 
   	savePCDFileASCII("out/post-processed_normals.pcd", *cloud_with_normals);
-	std::cout << "Saved input of " << cloud_with_normals->points.size() << " data points to out/post-processed" << std::endl;
+	print_highlight("Saving "); print_value("%s", "post-processed_normals.pcd");
 
   	// Create search tree
   	search::KdTree<PointNormal>::Ptr tree2 (new search::KdTree<PointNormal>);
@@ -199,9 +203,9 @@ int main(int argc, char const *argv[])
   	gp3.setSearchMethod (tree2);
   	gp3.reconstruct (triangles);
 	
-
-	saveVTKFile ("out/" + argv[vtk_file_indices[0]], triangles);
-
-	std::cout << "Saved final mesh to out/" << argv[vtk_file_indices[0]] << std::endl;
+  	std::string dir("out/");
+  	std::string file(argv[vtk_file_indices[0]]);
+	saveVTKFile (dir + file, triangles);
+	print_highlight("Saving "); print_value("%s", argv[vtk_file_indices[0]]);
 	return 0;
 }
