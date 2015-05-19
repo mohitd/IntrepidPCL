@@ -28,6 +28,7 @@
 #include <pcl/surface/organized_fast_mesh.h>
 #include <pcl/surface/ear_clipping.h>
 #include <pcl/surface/poisson.h>
+#include <pcl/surface/marching_cubes_rbf.h>
 
 int main(int argc, char const *argv[])
 {
@@ -80,17 +81,17 @@ int main(int argc, char const *argv[])
 	
 	// create the filtering object
 	int k = 200;
-	float stdev = 0.3f;
+	float stdev = 0.1f;
 	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
   	sor.setInputCloud (cloud2);
   	sor.setMeanK(k); // analyzes 1000 neighbors
   	sor.setStddevMulThresh(stdev); // remove all points who have a distance larger than 1 standard deviation of the mean distance
   	sor.filter(*cloud_filtered); // query point will be marked as outliers and removed
-  	`
+  	
   	std::cout << "Stats filtered cloud is now " << cloud_filtered->points.size() << std::endl;
   	flog << "Stats filtered cloud is now " << cloud_filtered->points.size() << std::endl;
 
-	float size = 0.01f;
+	float size = 0.3f;
   	pcl::VoxelGrid<pcl::PointXYZ> voxelFilter;
   	voxelFilter.setInputCloud(cloud_filtered);
   	voxelFilter.setLeafSize(size, size, size);	// create voxels of side length 1cm (0.01m)
@@ -99,13 +100,20 @@ int main(int argc, char const *argv[])
 	std::cout << "Voxel filtered cloud is now " << cloud_filtered2->points.size() << std::endl;
 	flog << "Voxel filtered cloud is now " << cloud_filtered2->points.size() << std::endl;
 
+	pcl::io::savePCDFileASCII("out/post-processed.pcd", *cloud_filtered2);
+	std::cout << "Saved input of " << cloud_filtered2->points.size() << " data points to out/post-processed" << std::endl;
+	flog << "Saved input of " << cloud_filtered2->points.size() << " data points to out/post-processed" << std::endl;
+
 	/** Estimating the surface normals */
 	pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+	tree->setInputCloud(cloud_filtered2);
+
   	ne.setInputCloud(cloud_filtered2);
-  	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
-  	ne.setSearchMethod (tree);
-  	pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
-	ne.setRadiusSearch (0.03);
+  	ne.setSearchMethod(tree);
+	ne.setKSearch(20);
+
+	pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
 	ne.compute (*cloud_normals);
 	
 	/** Creating a mesh */
@@ -114,9 +122,14 @@ int main(int argc, char const *argv[])
   	pcl::concatenateFields (*cloud_filtered2, *cloud_normals, *cloud_with_normals);
   	// cloud_with_normals = cloud + normals
 
+  	pcl::io::savePCDFileASCII("out/post-processed_normals.pcd", *cloud_with_normals);
+	std::cout << "Saved input of " << cloud_with_normals->points.size() << " data points to out/post-processed" << std::endl;
+	flog << "Saved input of " << cloud_with_normals->points.size() << " data points to out/post-processed" << std::endl;
+
   	// Create search tree
   	pcl::search::KdTree<pcl::PointNormal>::Ptr tree2 (new pcl::search::KdTree<pcl::PointNormal>);
   	tree2->setInputCloud (cloud_with_normals);
+  	
   	
   	// Initialize objects
   	pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
@@ -138,6 +151,7 @@ int main(int argc, char const *argv[])
   	gp3.setSearchMethod (tree2);
   	gp3.reconstruct (triangles);
 	
+
 	pcl::io::saveVTKFile ("out/mesh.vtk", triangles);
 
 	std::cout << "Saved final mesh to out/mesh.vtk" << std::endl;
