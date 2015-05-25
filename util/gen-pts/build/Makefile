@@ -43,10 +43,10 @@ RM = /usr/local/Cellar/cmake/3.1.3/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/MCR
+CMAKE_SOURCE_DIR = /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/util/gen-pts
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/MCR
+CMAKE_BINARY_DIR = /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/util/gen-pts/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -73,9 +73,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/MCR/CMakeFiles /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/MCR/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/util/gen-pts/build/CMakeFiles /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/util/gen-pts/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/MCR/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/util/gen-pts/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -103,41 +103,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named mcr
+# Target rules for targets named gen_sphere
 
 # Build rule for target.
-mcr: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 mcr
-.PHONY : mcr
+gen_sphere: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 gen_sphere
+.PHONY : gen_sphere
 
 # fast build rule for target.
-mcr/fast:
-	$(MAKE) -f CMakeFiles/mcr.dir/build.make CMakeFiles/mcr.dir/build
-.PHONY : mcr/fast
+gen_sphere/fast:
+	$(MAKE) -f CMakeFiles/gen_sphere.dir/build.make CMakeFiles/gen_sphere.dir/build
+.PHONY : gen_sphere/fast
 
-mcr.o: mcr.cpp.o
-.PHONY : mcr.o
+gen_sphere.o: gen_sphere.cpp.o
+.PHONY : gen_sphere.o
 
 # target to build an object file
-mcr.cpp.o:
-	$(MAKE) -f CMakeFiles/mcr.dir/build.make CMakeFiles/mcr.dir/mcr.cpp.o
-.PHONY : mcr.cpp.o
+gen_sphere.cpp.o:
+	$(MAKE) -f CMakeFiles/gen_sphere.dir/build.make CMakeFiles/gen_sphere.dir/gen_sphere.cpp.o
+.PHONY : gen_sphere.cpp.o
 
-mcr.i: mcr.cpp.i
-.PHONY : mcr.i
+gen_sphere.i: gen_sphere.cpp.i
+.PHONY : gen_sphere.i
 
 # target to preprocess a source file
-mcr.cpp.i:
-	$(MAKE) -f CMakeFiles/mcr.dir/build.make CMakeFiles/mcr.dir/mcr.cpp.i
-.PHONY : mcr.cpp.i
+gen_sphere.cpp.i:
+	$(MAKE) -f CMakeFiles/gen_sphere.dir/build.make CMakeFiles/gen_sphere.dir/gen_sphere.cpp.i
+.PHONY : gen_sphere.cpp.i
 
-mcr.s: mcr.cpp.s
-.PHONY : mcr.s
+gen_sphere.s: gen_sphere.cpp.s
+.PHONY : gen_sphere.s
 
 # target to generate assembly for a file
-mcr.cpp.s:
-	$(MAKE) -f CMakeFiles/mcr.dir/build.make CMakeFiles/mcr.dir/mcr.cpp.s
-.PHONY : mcr.cpp.s
+gen_sphere.cpp.s:
+	$(MAKE) -f CMakeFiles/gen_sphere.dir/build.make CMakeFiles/gen_sphere.dir/gen_sphere.cpp.s
+.PHONY : gen_sphere.cpp.s
 
 # Help Target
 help:
@@ -147,10 +147,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... mcr"
-	@echo "... mcr.o"
-	@echo "... mcr.i"
-	@echo "... mcr.s"
+	@echo "... gen_sphere"
+	@echo "... gen_sphere.o"
+	@echo "... gen_sphere.i"
+	@echo "... gen_sphere.s"
 .PHONY : help
 
 

@@ -1,4 +1,4 @@
-# Install script for directory: /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/MCR
+# Install script for directory: /Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/util/gen-pts
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -33,7 +33,7 @@ else()
   set(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 endif()
 
-file(WRITE "/Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/MCR/${CMAKE_INSTALL_MANIFEST}" "")
+file(WRITE "/Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/util/gen-pts/build/${CMAKE_INSTALL_MANIFEST}" "")
 foreach(file ${CMAKE_INSTALL_MANIFEST_FILES})
-  file(APPEND "/Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/MCR/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+  file(APPEND "/Users/mohitd/Developer/workspace_AFRL/IntrepidPCL/util/gen-pts/build/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
 endforeach()
