@@ -44,6 +44,7 @@ using namespace pcl::console;
 int default_mean_k = 200;
 float default_stdev = 0.3f;
 float default_leaf_size = 0.01f;
+int default_norm_k = 100;
 
 void print_help(char **argv)
 {
@@ -57,6 +58,9 @@ void print_help(char **argv)
 
 	print_info("\t\t-leaf_size X\t= the resolution of the grid (VoxelGridFilter) (cubic grid) (default: ");
   	print_value("%f", default_leaf_size); print_info(")\n");
+
+  	print_info("\t\t-norm_k X\t= the number of nearest neighbors for normal estimation (default: ");
+  	print_value("%f", default_norm_k); print_info(")\n");
 }
 
 int main(int argc, char *argv[])
@@ -94,6 +98,10 @@ int main(int argc, char *argv[])
 	float leaf_size = default_leaf_size;
 	parse_argument(argc, argv, "-leaf_size", leaf_size);
 	print_info("Setting a leaf size of: "); print_value("%f\n", leaf_size);
+
+	int norm_k = default_norm_k;
+	parse_argument(argc, argv, "-norm_k", norm_k);
+	print_info("Setting a norm k of: "); print_value("%d\n", norm_k);
 
 	ifstream fin(argv[txt_file_indices[0]]);
 
@@ -165,12 +173,12 @@ int main(int argc, char *argv[])
 	tree->setInputCloud(cloud_filtered2);
 
 	unsigned int nthreads = 2;
-	print_info("Running normal estimation on "); print_value("%d"); print_info(" threads\n");
+	print_info("Running normal estimation on "); print_value("%d", nthreads); print_info(" threads\n");
 	
 	ne.setNumberOfThreads(nthreads);
   	ne.setInputCloud(cloud_filtered2);
   	ne.setSearchMethod(tree);
-	ne.setKSearch(20);
+	ne.setKSearch(norm_k);
 
 	PointCloud<Normal>::Ptr cloud_normals (new PointCloud<Normal>);
 
