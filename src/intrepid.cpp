@@ -1,41 +1,21 @@
 #include <iostream>
-#include <string>
 #include <fstream>
-#include <sstream>
-#include <stdlib.h> 
-#include <ctime>
-#include <thread>
 
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/vtk_io.h>
-#include <pcl/point_types.h>
+
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
-#include <pcl/features/normal_3d.h>
+
 #include <pcl/features/normal_3d_omp.h>
 
-#include <boost/thread/thread.hpp>
 #include <pcl/common/common_headers.h>
-#include <pcl/visualization/pcl_visualizer.h>
-#include <pcl/console/parse.h>
 
-#include <pcl/io/obj_io.h>
-#include <pcl/TextureMesh.h>
-#include <pcl/surface/texture_mapping.h>
-#include <pcl/surface/mls.h>
 #include <pcl/surface/gp3.h>
-#include <pcl/surface/grid_projection.h>
-#include <pcl/surface/convex_hull.h>
-#include <pcl/surface/concave_hull.h>
-#include <pcl/surface/organized_fast_mesh.h>
-#include <pcl/surface/ear_clipping.h>
-#include <pcl/surface/poisson.h>
-#include <pcl/surface/marching_cubes_rbf.h>
 
-#include <pcl/console/print.h>
-#include <pcl/console/parse.h>
 #include <pcl/console/time.h>
+#include <pcl/console/parse.h>
 
 using namespace pcl;
 using namespace pcl::io;
@@ -103,16 +83,16 @@ int main(int argc, char *argv[])
 	parse_argument(argc, argv, "-norm_k", norm_k);
 	print_info("Setting a norm k of: "); print_value("%d\n", norm_k);
 
-	ifstream fin(argv[txt_file_indices[0]]);
+	std::ifstream fin(argv[txt_file_indices[0]]);
 
-	int num_data_pts = 0;
+	uint32_t num_data_pts = 0;
     std::string line;
 
     while (std::getline(fin, line)) ++num_data_pts;
     print_info("Num of data points: "); print_value("%d\n", num_data_pts);
     
     fin.clear();
-    fin.seekg(0, ios::beg);
+    fin.seekg(0, std::ios::beg);
 	
 	PointCloud<PointXYZ> cloud;
 	cloud.width = num_data_pts;

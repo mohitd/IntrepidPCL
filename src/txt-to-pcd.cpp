@@ -1,10 +1,8 @@
 #include <iostream>
-#include <string>
 #include <fstream>
 
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/common/common_headers.h>
 
@@ -16,7 +14,7 @@ int main(int argc, char *argv[])
 {
 	ifstream fin(argv[1]);
 
-	int num_data_pts = 0;
+	uint32_t num_data_pts = 0;
     string line;
 
     while (getline(fin, line)) ++num_data_pts;

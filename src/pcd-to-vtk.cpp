@@ -1,37 +1,15 @@
 #include <iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <stdlib.h> 
-#include <ctime>
-#include <thread>
 
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/vtk_io.h>
-#include <pcl/point_types.h>
 
-#include <boost/thread/thread.hpp>
 #include <pcl/common/common_headers.h>
-#include <pcl/visualization/pcl_visualizer.h>
-#include <pcl/console/parse.h>
 
-#include <pcl/io/obj_io.h>
-#include <pcl/TextureMesh.h>
-#include <pcl/surface/texture_mapping.h>
-#include <pcl/surface/mls.h>
 #include <pcl/surface/gp3.h>
-#include <pcl/surface/grid_projection.h>
-#include <pcl/surface/convex_hull.h>
-#include <pcl/surface/concave_hull.h>
-#include <pcl/surface/organized_fast_mesh.h>
-#include <pcl/surface/ear_clipping.h>
-#include <pcl/surface/poisson.h>
-#include <pcl/surface/marching_cubes_rbf.h>
 
-#include <pcl/console/print.h>
-#include <pcl/console/parse.h>
 #include <pcl/console/time.h>
+#include <pcl/console/parse.h>
 
 using namespace std;
 using namespace pcl;

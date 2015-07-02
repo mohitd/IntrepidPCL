@@ -154,29 +154,29 @@ ttp/fast:
 	$(MAKE) -f CMakeFiles/ttp.dir/build.make CMakeFiles/ttp.dir/build
 .PHONY : ttp/fast
 
-src/intrepid_pcl.o: src/intrepid_pcl.cpp.o
-.PHONY : src/intrepid_pcl.o
+src/intrepid.o: src/intrepid.cpp.o
+.PHONY : src/intrepid.o
 
 # target to build an object file
-src/intrepid_pcl.cpp.o:
-	$(MAKE) -f CMakeFiles/intrepid.dir/build.make CMakeFiles/intrepid.dir/src/intrepid_pcl.cpp.o
-.PHONY : src/intrepid_pcl.cpp.o
+src/intrepid.cpp.o:
+	$(MAKE) -f CMakeFiles/intrepid.dir/build.make CMakeFiles/intrepid.dir/src/intrepid.cpp.o
+.PHONY : src/intrepid.cpp.o
 
-src/intrepid_pcl.i: src/intrepid_pcl.cpp.i
-.PHONY : src/intrepid_pcl.i
+src/intrepid.i: src/intrepid.cpp.i
+.PHONY : src/intrepid.i
 
 # target to preprocess a source file
-src/intrepid_pcl.cpp.i:
-	$(MAKE) -f CMakeFiles/intrepid.dir/build.make CMakeFiles/intrepid.dir/src/intrepid_pcl.cpp.i
-.PHONY : src/intrepid_pcl.cpp.i
+src/intrepid.cpp.i:
+	$(MAKE) -f CMakeFiles/intrepid.dir/build.make CMakeFiles/intrepid.dir/src/intrepid.cpp.i
+.PHONY : src/intrepid.cpp.i
 
-src/intrepid_pcl.s: src/intrepid_pcl.cpp.s
-.PHONY : src/intrepid_pcl.s
+src/intrepid.s: src/intrepid.cpp.s
+.PHONY : src/intrepid.s
 
 # target to generate assembly for a file
-src/intrepid_pcl.cpp.s:
-	$(MAKE) -f CMakeFiles/intrepid.dir/build.make CMakeFiles/intrepid.dir/src/intrepid_pcl.cpp.s
-.PHONY : src/intrepid_pcl.cpp.s
+src/intrepid.cpp.s:
+	$(MAKE) -f CMakeFiles/intrepid.dir/build.make CMakeFiles/intrepid.dir/src/intrepid.cpp.s
+.PHONY : src/intrepid.cpp.s
 
 src/mcr.o: src/mcr.cpp.o
 .PHONY : src/mcr.o
@@ -262,9 +262,9 @@ help:
 	@echo "... intrepid"
 	@echo "... mcr"
 	@echo "... ttp"
-	@echo "... src/intrepid_pcl.o"
-	@echo "... src/intrepid_pcl.i"
-	@echo "... src/intrepid_pcl.s"
+	@echo "... src/intrepid.o"
+	@echo "... src/intrepid.i"
+	@echo "... src/intrepid.s"
 	@echo "... src/mcr.o"
 	@echo "... src/mcr.i"
 	@echo "... src/mcr.s"
