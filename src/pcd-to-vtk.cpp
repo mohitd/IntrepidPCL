@@ -16,8 +16,32 @@ using namespace pcl;
 using namespace pcl::io;
 using namespace pcl::console;
 
+void print_help(char **argv)
+{
+	print_error("Syntax is: %s in.pcd <options>\n", argv[0]);
+}
+
 int main(int argc, char *argv[])
-{	
+{
+	if (argc < 2)
+	{
+		print_help(argv);
+		return -1;
+	}
+
+	// Parse the command line arguments for .pcd files
+	vector<int> txt_file_indices;
+	txt_file_indices = parse_file_extension_argument(argc, argv, ".pcd");
+	if (txt_file_indices.size () != 1)
+	{
+		print_error("Need one input PCD file to continue.\n");
+		return -1;
+	}
+
+	string inputFileName = string(argv[txt_file_indices[0]]);
+	size_t ext = inputFileName.find(".pcd");
+	string outputFileName = inputFileName.substr(0, ext) + string(".vtk");
+
 	PointCloud<PointNormal>::Ptr cloud_with_normals(new PointCloud<PointNormal>);
 	loadPCDFile<PointNormal>(argv[1], *cloud_with_normals);
 
@@ -43,14 +67,14 @@ int main(int argc, char *argv[])
   	gp3.setInputCloud (cloud_with_normals);
   	gp3.setSearchMethod (tree2);
 
-  	TicToc tt4;
-  	tt4.tic();
+  	TicToc tt;
+  	tt.tic();
   	print_highlight("Computing GreedyProjectionTriangulation ");
   	gp3.reconstruct (triangles);
-  	print_info("[done, "); print_value("%g", tt4.toc()); print_info(" ms]\n");
+  	print_info("[done, "); print_value("%g", tt.toc()); print_info(" ms]\n");
 	
-	saveVTKFile ("triangulation.vtk", triangles);
-	print_highlight("Saving triangulation.vtk\n");
+	saveVTKFile (outputFileName, triangles);
+	print_highlight(string(string("Saving ") + outputFileName + string("\n")).c_str());
 
 	return 0;
 }

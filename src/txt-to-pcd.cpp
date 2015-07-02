@@ -6,13 +6,40 @@
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/common/common_headers.h>
 
+#include <pcl/console/parse.h>
+
 using namespace std;
 using namespace pcl;
 using namespace pcl::io;
+using namespace pcl::console;
+
+void print_help(char **argv)
+{
+	print_error("Syntax is: %s in.txt <options>\n", argv[0]);
+}
 
 int main(int argc, char *argv[])
 {
-	ifstream fin(argv[1]);
+	if (argc < 2)
+	{
+		print_help(argv);
+		return -1;
+	}
+
+	// Parse the command line arguments for .pcd files
+	vector<int> txt_file_indices;
+	txt_file_indices = parse_file_extension_argument(argc, argv, ".txt");
+	if (txt_file_indices.size () != 1)
+	{
+		print_error("Need one input TEXT file to continue.\n");
+		return -1;
+	}
+
+	string inputFileName = string(argv[txt_file_indices[0]]);
+	size_t ext = inputFileName.find(".txt");
+	string outputFileNameCore = inputFileName.substr(0, ext);
+
+	ifstream fin(argv[txt_file_indices[0]]);
 
 	uint32_t num_data_pts = 0;
     string line;
@@ -39,8 +66,9 @@ int main(int argc, char *argv[])
 	}
 
 	fin.close();
-	savePCDFileASCII("out.pcd", *cloud);
-	cout << "Saving out.pcd" << endl;
+	string outPCD = outputFileNameCore + string(".pcd");
+	savePCDFileASCII(outPCD, *cloud);
+	cout << "Saving " << outPCD << endl;
 
 	/** Estimating the surface normals */
 	NormalEstimationOMP<PointXYZ, Normal> ne;
@@ -65,8 +93,9 @@ int main(int argc, char *argv[])
   	concatenateFields (*cloud, *cloud_normals, *cloud_with_normals);
   	// cloud_with_normals = cloud + normals
 
-  	savePCDFileASCII("out-with-normals.pcd", *cloud_with_normals);
-	cout << "Saving out-with-normals.pcd" << endl;
+	string outPCDWithNormals = string("n-") + outputFileNameCore + string(".pcd");
+  	savePCDFileASCII(outPCDWithNormals, *cloud_with_normals);
+	cout << "Saving " << outPCDWithNormals << endl;
 
 	return 0;
 }
