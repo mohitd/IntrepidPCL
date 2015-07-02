@@ -103,41 +103,152 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named pcd_write
+# Target rules for targets named intrepid
 
 # Build rule for target.
-pcd_write: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 pcd_write
-.PHONY : pcd_write
+intrepid: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 intrepid
+.PHONY : intrepid
 
 # fast build rule for target.
-pcd_write/fast:
-	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/build
-.PHONY : pcd_write/fast
+intrepid/fast:
+	$(MAKE) -f CMakeFiles/intrepid.dir/build.make CMakeFiles/intrepid.dir/build
+.PHONY : intrepid/fast
 
-intrepid_pcl.o: intrepid_pcl.cpp.o
-.PHONY : intrepid_pcl.o
+#=============================================================================
+# Target rules for targets named mcr
+
+# Build rule for target.
+mcr: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 mcr
+.PHONY : mcr
+
+# fast build rule for target.
+mcr/fast:
+	$(MAKE) -f CMakeFiles/mcr.dir/build.make CMakeFiles/mcr.dir/build
+.PHONY : mcr/fast
+
+#=============================================================================
+# Target rules for targets named ptv
+
+# Build rule for target.
+ptv: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ptv
+.PHONY : ptv
+
+# fast build rule for target.
+ptv/fast:
+	$(MAKE) -f CMakeFiles/ptv.dir/build.make CMakeFiles/ptv.dir/build
+.PHONY : ptv/fast
+
+#=============================================================================
+# Target rules for targets named ttp
+
+# Build rule for target.
+ttp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ttp
+.PHONY : ttp
+
+# fast build rule for target.
+ttp/fast:
+	$(MAKE) -f CMakeFiles/ttp.dir/build.make CMakeFiles/ttp.dir/build
+.PHONY : ttp/fast
+
+src/intrepid_pcl.o: src/intrepid_pcl.cpp.o
+.PHONY : src/intrepid_pcl.o
 
 # target to build an object file
-intrepid_pcl.cpp.o:
-	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/intrepid_pcl.cpp.o
-.PHONY : intrepid_pcl.cpp.o
+src/intrepid_pcl.cpp.o:
+	$(MAKE) -f CMakeFiles/intrepid.dir/build.make CMakeFiles/intrepid.dir/src/intrepid_pcl.cpp.o
+.PHONY : src/intrepid_pcl.cpp.o
 
-intrepid_pcl.i: intrepid_pcl.cpp.i
-.PHONY : intrepid_pcl.i
+src/intrepid_pcl.i: src/intrepid_pcl.cpp.i
+.PHONY : src/intrepid_pcl.i
 
 # target to preprocess a source file
-intrepid_pcl.cpp.i:
-	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/intrepid_pcl.cpp.i
-.PHONY : intrepid_pcl.cpp.i
+src/intrepid_pcl.cpp.i:
+	$(MAKE) -f CMakeFiles/intrepid.dir/build.make CMakeFiles/intrepid.dir/src/intrepid_pcl.cpp.i
+.PHONY : src/intrepid_pcl.cpp.i
 
-intrepid_pcl.s: intrepid_pcl.cpp.s
-.PHONY : intrepid_pcl.s
+src/intrepid_pcl.s: src/intrepid_pcl.cpp.s
+.PHONY : src/intrepid_pcl.s
 
 # target to generate assembly for a file
-intrepid_pcl.cpp.s:
-	$(MAKE) -f CMakeFiles/pcd_write.dir/build.make CMakeFiles/pcd_write.dir/intrepid_pcl.cpp.s
-.PHONY : intrepid_pcl.cpp.s
+src/intrepid_pcl.cpp.s:
+	$(MAKE) -f CMakeFiles/intrepid.dir/build.make CMakeFiles/intrepid.dir/src/intrepid_pcl.cpp.s
+.PHONY : src/intrepid_pcl.cpp.s
+
+src/mcr.o: src/mcr.cpp.o
+.PHONY : src/mcr.o
+
+# target to build an object file
+src/mcr.cpp.o:
+	$(MAKE) -f CMakeFiles/mcr.dir/build.make CMakeFiles/mcr.dir/src/mcr.cpp.o
+.PHONY : src/mcr.cpp.o
+
+src/mcr.i: src/mcr.cpp.i
+.PHONY : src/mcr.i
+
+# target to preprocess a source file
+src/mcr.cpp.i:
+	$(MAKE) -f CMakeFiles/mcr.dir/build.make CMakeFiles/mcr.dir/src/mcr.cpp.i
+.PHONY : src/mcr.cpp.i
+
+src/mcr.s: src/mcr.cpp.s
+.PHONY : src/mcr.s
+
+# target to generate assembly for a file
+src/mcr.cpp.s:
+	$(MAKE) -f CMakeFiles/mcr.dir/build.make CMakeFiles/mcr.dir/src/mcr.cpp.s
+.PHONY : src/mcr.cpp.s
+
+src/pcd-to-vtk.o: src/pcd-to-vtk.cpp.o
+.PHONY : src/pcd-to-vtk.o
+
+# target to build an object file
+src/pcd-to-vtk.cpp.o:
+	$(MAKE) -f CMakeFiles/ptv.dir/build.make CMakeFiles/ptv.dir/src/pcd-to-vtk.cpp.o
+.PHONY : src/pcd-to-vtk.cpp.o
+
+src/pcd-to-vtk.i: src/pcd-to-vtk.cpp.i
+.PHONY : src/pcd-to-vtk.i
+
+# target to preprocess a source file
+src/pcd-to-vtk.cpp.i:
+	$(MAKE) -f CMakeFiles/ptv.dir/build.make CMakeFiles/ptv.dir/src/pcd-to-vtk.cpp.i
+.PHONY : src/pcd-to-vtk.cpp.i
+
+src/pcd-to-vtk.s: src/pcd-to-vtk.cpp.s
+.PHONY : src/pcd-to-vtk.s
+
+# target to generate assembly for a file
+src/pcd-to-vtk.cpp.s:
+	$(MAKE) -f CMakeFiles/ptv.dir/build.make CMakeFiles/ptv.dir/src/pcd-to-vtk.cpp.s
+.PHONY : src/pcd-to-vtk.cpp.s
+
+src/txt-to-pcd.o: src/txt-to-pcd.cpp.o
+.PHONY : src/txt-to-pcd.o
+
+# target to build an object file
+src/txt-to-pcd.cpp.o:
+	$(MAKE) -f CMakeFiles/ttp.dir/build.make CMakeFiles/ttp.dir/src/txt-to-pcd.cpp.o
+.PHONY : src/txt-to-pcd.cpp.o
+
+src/txt-to-pcd.i: src/txt-to-pcd.cpp.i
+.PHONY : src/txt-to-pcd.i
+
+# target to preprocess a source file
+src/txt-to-pcd.cpp.i:
+	$(MAKE) -f CMakeFiles/ttp.dir/build.make CMakeFiles/ttp.dir/src/txt-to-pcd.cpp.i
+.PHONY : src/txt-to-pcd.cpp.i
+
+src/txt-to-pcd.s: src/txt-to-pcd.cpp.s
+.PHONY : src/txt-to-pcd.s
+
+# target to generate assembly for a file
+src/txt-to-pcd.cpp.s:
+	$(MAKE) -f CMakeFiles/ttp.dir/build.make CMakeFiles/ttp.dir/src/txt-to-pcd.cpp.s
+.PHONY : src/txt-to-pcd.cpp.s
 
 # Help Target
 help:
@@ -145,12 +256,24 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... ptv"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... pcd_write"
-	@echo "... intrepid_pcl.o"
-	@echo "... intrepid_pcl.i"
-	@echo "... intrepid_pcl.s"
+	@echo "... intrepid"
+	@echo "... mcr"
+	@echo "... ttp"
+	@echo "... src/intrepid_pcl.o"
+	@echo "... src/intrepid_pcl.i"
+	@echo "... src/intrepid_pcl.s"
+	@echo "... src/mcr.o"
+	@echo "... src/mcr.i"
+	@echo "... src/mcr.s"
+	@echo "... src/pcd-to-vtk.o"
+	@echo "... src/pcd-to-vtk.i"
+	@echo "... src/pcd-to-vtk.s"
+	@echo "... src/txt-to-pcd.o"
+	@echo "... src/txt-to-pcd.i"
+	@echo "... src/txt-to-pcd.s"
 .PHONY : help
 
 
