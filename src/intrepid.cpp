@@ -285,6 +285,8 @@ int main(int argc, char *argv[]) {
     print_value("%g", tt4.toc());
     print_info(" ms]\n");
 
+    delete reconstruction;
+
     std::string file(argv[vtk_file_indices[0]]);
     saveVTKFile(std::string("out/") + file, triangles);
     print_highlight("Saving ");
