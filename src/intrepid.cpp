@@ -24,7 +24,7 @@ using namespace pcl::io;
 using namespace pcl::console;
 
 int default_mean_k = 200;
-float default_stdev = 0.3f;
+float default_stdev = 0.1f;
 float default_leaf_size = 0.01f;
 int default_norm_k = 100;
 float default_off_surface_eps = 0.1f;
@@ -58,6 +58,119 @@ void print_help(char **argv) {
     print_info("            3 : MarchingCubesRBF\n");
 }
 
+/**
+ * Read point cloud data from the given file and put the input cloud in 'cloud'
+ */
+void read_point_cloud(const std::string &fileName, PointCloud<PointXYZ> &cloud) {
+    std::ifstream fin(fileName);
+
+    uint32_t num_data_pts = 0;
+    std::string line;
+
+    while (std::getline(fin, line)) ++num_data_pts;
+    print_info("Num of data points: ");
+    print_value("%d\n", num_data_pts);
+
+    fin.clear();
+    fin.seekg(0, std::ios::beg);
+
+    cloud.width = num_data_pts;
+    cloud.height = 1;
+    cloud.points.resize(cloud.width * cloud.height);
+
+    for (int i = 0; i < cloud.width; ++i) {
+        float x, y, z;
+        fin >> x >> y >> z;
+
+        cloud.points[i].x = x;
+        cloud.points[i].y = y;
+        cloud.points[i].z = z;
+    }
+
+    fin.close();
+}
+
+/**
+ * Performs statistical outlier removal
+ * Overwrites 'cloud' with filtered cloud
+ */
+void filter_statistical_outlier(PointCloud<PointXYZ> &cloud, int k, float stdev) {
+    // New cloud to hold filtered data
+    PointCloud<PointXYZ>::Ptr cloudFiltered(new PointCloud<PointXYZ>());
+    PointCloud<PointXYZ>::Ptr cloudCopy(new PointCloud<PointXYZ>(cloud));
+
+    StatisticalOutlierRemoval<PointXYZ> sor;
+    sor.setInputCloud(cloudCopy);
+    sor.setMeanK(k);
+    sor.setStddevMulThresh(stdev);
+
+    TicToc tt;
+    tt.tic();
+    print_highlight("Computing StatisticalOutlierRemoval ");
+    sor.filter(*cloudFiltered);
+    print_info("[done, ");
+    print_value("%g", tt.toc());
+    print_info(" ms]\n");
+
+    print_info("Stats filtered cloud is now ");
+    print_value("%d\n\n", cloudFiltered->points.size());
+    cloud = *cloudFiltered;
+}
+
+/**
+ * Performs the voxel grid filter to downsample data
+ * Overwrites 'cloud' with filtered cloud
+ */
+void filter_voxel_grid(PointCloud<PointXYZ> &cloud, float size) {
+    PointCloud<PointXYZ>::Ptr cloudFiltered(new PointCloud<PointXYZ>());
+    PointCloud<PointXYZ>::Ptr cloudCopy(new PointCloud<PointXYZ>(cloud));
+
+    VoxelGrid<PointXYZ> voxelFilter;
+    voxelFilter.setInputCloud(cloudCopy);
+    voxelFilter.setLeafSize(size, size, size);
+
+    TicToc tt;
+    tt.tic();
+    print_highlight("Computing VoxelGridFilter ");
+    voxelFilter.filter(*cloudFiltered);
+    print_info("[done, ");
+    print_value("%g", tt.toc());
+    print_info(" ms]\n");
+
+    print_info("Voxel filtered cloud is now ");
+    print_value("%d\n", cloudFiltered->points.size());
+    cloud = *cloudFiltered;
+}
+
+/**
+ * Normal estimation from tangent planes using PCA (run on multiple threads with OpenMP)
+ */
+void normal_estimation(PointCloud<PointXYZ> &cloud, PointCloud<Normal> &cloudNormals, int k) {
+    PointCloud<PointXYZ>::Ptr cloudCopy(new PointCloud<PointXYZ>(cloud));
+    NormalEstimationOMP<PointXYZ, Normal> ne;
+
+    search::KdTree<PointXYZ>::Ptr pointTree(new search::KdTree<PointXYZ>);
+    pointTree->setInputCloud(cloudCopy);
+
+    unsigned int nthreads = 2;
+    print_info("Running normal estimation on ");
+    print_value("%d", nthreads);
+    print_info(" threads\n");
+
+    ne.setNumberOfThreads(nthreads);
+    ne.setInputCloud(cloudCopy);
+    ne.setSearchMethod(pointTree);
+    ne.setKSearch(k);
+
+    TicToc tt3;
+    tt3.tic();
+    print_highlight("Computing normals ");
+    ne.compute(cloudNormals);
+    print_info("[done, ");
+    print_value("%g", tt3.toc());
+    print_info(" ms]\n");
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 3) {
         print_help(argv);
@@ -65,8 +178,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Parse the command line arguments for .pcd files
-    std::vector<int> txt_file_indices;
-    txt_file_indices = parse_file_extension_argument(argc, argv, ".txt");
+    std::vector<int> txt_file_indices = parse_file_extension_argument(argc, argv, ".txt");
     if (txt_file_indices.size() != 1) {
         print_error("Need one input text file and one output VTK file to continue.\n");
         return -1;
@@ -114,126 +226,27 @@ int main(int argc, char *argv[]) {
         print_info("Selected algorithm: MarchingCubesRBF\n");
     }
 
-    std::ifstream fin(argv[txt_file_indices[0]]);
-
-    uint32_t num_data_pts = 0;
-    std::string line;
-
-    while (std::getline(fin, line)) ++num_data_pts;
-    print_info("Num of data points: ");
-    print_value("%d\n", num_data_pts);
-
-    fin.clear();
-    fin.seekg(0, std::ios::beg);
 
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>());
-    cloud->width = num_data_pts;
-    cloud->height = 1;
-    cloud->points.resize(cloud->width * cloud->height);
+    read_point_cloud(argv[txt_file_indices[0]], *cloud);
 
-    for (int i = 0; i < cloud->width; ++i) {
-        float x, y, z;
-        fin >> x >> y >> z;
-
-        cloud->points[i].x = x;
-        cloud->points[i].y = y;
-        cloud->points[i].z = z;
-    }
-
-    fin.close();
-    savePCDFileASCII("out/pre-processed.pcd", *cloud);
-    print_highlight("Saving ");
-    print_value("%s\n", "pre-processed.pcd");
-
-    /******************************************************************************************************************
-     * STATISTICAL OUTLIER REMOVAL
-     ******************************************************************************************************************/
-
-    // New cloud to hold filtered data
-    PointCloud<PointXYZ>::Ptr cloudSORFiltered(new PointCloud<PointXYZ>());
-    StatisticalOutlierRemoval<PointXYZ> sor;
-    sor.setInputCloud(cloud);
-    sor.setMeanK(mean_k);
-    sor.setStddevMulThresh(stdev);
-
-    TicToc tt1;
-    tt1.tic();
-    print_highlight("Computing StatisticalOutlierRemoval ");
-    sor.filter(*cloudSORFiltered);
-    print_info("[done, ");
-    print_value("%g", tt1.toc());
-    print_info(" ms]\n");
-
-    print_info("Stats filtered cloud is now ");
-    print_value("%d\n", cloudSORFiltered->points.size());
-
-    /******************************************************************************************************************
-     * VOXEL GRID FILTER
-     ******************************************************************************************************************/
-
-    PointCloud<PointXYZ>::Ptr cloudVGFFiltered(new PointCloud<PointXYZ>());
-    VoxelGrid<PointXYZ> voxelFilter;
-    voxelFilter.setInputCloud(cloudSORFiltered);
-    voxelFilter.setLeafSize(leaf_size, leaf_size, leaf_size);
-
-    TicToc tt2;
-    tt2.tic();
-    print_highlight("Computing VoxelGridFilter ");
-    voxelFilter.filter(*cloudVGFFiltered);
-    print_info("[done, ");
-    print_value("%g", tt2.toc());
-    print_info(" ms]\n");
-
-    print_info("Voxel filtered cloud is now ");
-    print_value("%d\n", cloudVGFFiltered->points.size());
-
-    savePCDFileASCII("out/post-processed.pcd", *cloudVGFFiltered);
-    print_highlight("Saving ");
-    print_value("%s\n", "post-processed.pcd");
-
-    /******************************************************************************************************************
-     * NORMAL ESTIMATION
-     ******************************************************************************************************************/
+    filter_statistical_outlier(*cloud, mean_k, stdev);
+    filter_voxel_grid(*cloud, leaf_size);
 
     PointCloud<Normal>::Ptr cloudNormals(new PointCloud<Normal>());
-    NormalEstimationOMP<PointXYZ, Normal> ne;
-    search::KdTree<PointXYZ>::Ptr pointTree(new search::KdTree<PointXYZ>);
-    pointTree->setInputCloud(cloudVGFFiltered);
+    normal_estimation(*cloud, *cloudNormals, norm_k);
 
-    unsigned int nthreads = 2;
-    print_info("Running normal estimation on ");
-    print_value("%d", nthreads);
-    print_info(" threads\n");
-
-    ne.setNumberOfThreads(nthreads);
-    ne.setInputCloud(cloudVGFFiltered);
-    ne.setSearchMethod(pointTree);
-    ne.setKSearch(norm_k);
-
-    TicToc tt3;
-    tt3.tic();
-    print_highlight("Computing normals ");
-    ne.compute(*cloudNormals);
-    print_info("[done, ");
-    print_value("%g", tt3.toc());
-    print_info(" ms]\n");
-
+    /******************************************************************************************************************
+    * SURFACE RECONSTRUCTION
+    ******************************************************************************************************************/
 
     // Concatenate the XYZ and normal fields
     PointCloud<PointNormal>::Ptr cloudWithNormals(new PointCloud<PointNormal>());
-    concatenateFields(*cloudVGFFiltered, *cloudNormals, *cloudWithNormals);
-
-    savePCDFileASCII("out/post-processed_normals.pcd", *cloudWithNormals);
-    print_highlight("Saving ");
-    print_value("%s\n", "post-processed_normals.pcd");
+    concatenateFields(*cloud, *cloudNormals, *cloudWithNormals);
 
     // Create k-d search tree that has the points and point normals
     search::KdTree<PointNormal>::Ptr normalTree(new search::KdTree<PointNormal>);
     normalTree->setInputCloud(cloudWithNormals);
-
-    /******************************************************************************************************************
-     * SURFACE RECONSTRUCTION
-     ******************************************************************************************************************/
 
     PolygonMesh triangles;
 
