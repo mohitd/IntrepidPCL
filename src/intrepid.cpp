@@ -35,8 +35,7 @@ int default_norm_k = 100;
 float default_off_surface_eps = 0.1f;
 int default_grid_res = 50;
 int default_algorithm = 1;
-
-int default_search_radius;
+float default_search_radius = 0.03f;
 
 void print_help(char **argv) {
     print_error("Syntax is: %s in.txt out.vtk <options>\n", argv[0]);
@@ -196,13 +195,12 @@ void normal_estimation(PointCloud<PointXYZ> &cloud, PointCloud<Normal> &cloudNor
     tt.tic();
     print_highlight("Computing normals on ");
     print_value("%d", nthreads);
-    print_info(" threads\n");
+    print_info(" threads");
     ne.compute(cloudNormals);
     print_info("[done, ");
     print_value("%g", tt.toc());
     print_info(" ms]\n\n");
 }
-
 
 void normal_smoothing(PointCloud<PointNormal> &cloud, float r) {
     search::KdTree<PointNormal>::Ptr tree(new search::KdTree<PointNormal>);
@@ -226,7 +224,6 @@ void normal_smoothing(PointCloud<PointNormal> &cloud, float r) {
 
     cloud = cloudSmoothed;
 }
-
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
@@ -261,6 +258,7 @@ int main(int argc, char *argv[]) {
 
     float radius = default_radius;
     int min_neighbors = deafult_min_neighbors;
+    float search_radius= default_search_radius;
 
     float leaf_size = default_leaf_size;
     parse_argument(argc, argv, "-leaf_size", leaf_size);
@@ -274,7 +272,7 @@ int main(int argc, char *argv[]) {
     print_info("Setting a norm k of: ");
     print_value("%d\n", norm_k);
 
-    std::string str_algorithm;
+    std::string str_algorithm("");
     int algorithm = default_algorithm;
     parse_argument(argc, argv, "-algorithm", algorithm);
     if (algorithm <= 1 || algorithm > 3) {
@@ -302,7 +300,7 @@ int main(int argc, char *argv[]) {
     PointCloud<PointNormal>::Ptr cloudWithNormals(new PointCloud<PointNormal>());
     concatenateFields(*cloud, *cloudNormals, *cloudWithNormals);
 
-//    normal_smoothing(*cloudWithNormals, .03f);
+    normal_smoothing(*cloudWithNormals, search_radius);
 
     // Create k-d search tree that has the points and point normals
     search::KdTree<PointNormal>::Ptr normalTree(new search::KdTree<PointNormal>);
@@ -350,18 +348,17 @@ int main(int argc, char *argv[]) {
     reconstruction->setInputCloud(cloudWithNormals);
     reconstruction->setSearchMethod(normalTree);
 
-    TicToc tt4;
-    tt4.tic();
+    TicToc tt;
+    tt.tic();
     print_highlight((std::string("Computing %s ") + str_algorithm).c_str());
     reconstruction->reconstruct(triangles);
     print_info("[done, ");
-    print_value("%g", tt4.toc());
+    print_value("%g", tt.toc());
     print_info(" ms]\n");
 
     delete reconstruction;
 
-    std::string file(argv[vtk_file_indices[0]]);
-    saveVTKFile(std::string("out/") + file, triangles);
+    saveVTKFile(argv[vtk_file_indices[0]], triangles);
     print_highlight("Saving ");
     print_value("%s\n", argv[vtk_file_indices[0]]);
     return 0;
