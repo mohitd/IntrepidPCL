@@ -17,6 +17,7 @@
 #include <pcl/surface/marching_cubes_hoppe.h>
 #include <pcl/surface/marching_cubes_rbf.h>
 #include <pcl/surface/mls.h>
+#include <pcl/surface/impl/mls.hpp>
 
 #include <pcl/console/time.h>
 #include <pcl/console/parse.h>
@@ -68,7 +69,7 @@ void print_help(char **argv) {
  * Read point cloud data from the given file and put the input cloud in 'cloud'
  */
 void read_point_cloud(const std::string &fileName, PointCloud<PointXYZ> &cloud) {
-    std::ifstream fin(fileName);
+    std::ifstream fin(fileName.c_str());
 
     uint32_t num_data_pts = 0;
     std::string line;
@@ -202,7 +203,7 @@ void normal_estimation(PointCloud<PointXYZ> &cloud, PointCloud<Normal> &cloudNor
     print_info(" ms]\n\n");
 }
 
-/*
+
 void normal_smoothing(PointCloud<PointNormal> &cloud, float r) {
     search::KdTree<PointNormal>::Ptr tree(new search::KdTree<PointNormal>);
     PointCloud<PointNormal>::Ptr cloudCopy(new PointCloud<PointNormal>(cloud));
@@ -225,7 +226,7 @@ void normal_smoothing(PointCloud<PointNormal> &cloud, float r) {
 
     cloud = cloudSmoothed;
 }
-*/
+
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
