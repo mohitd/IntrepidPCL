@@ -6,6 +6,7 @@
 #include <pcl/io/vtk_io.h>
 
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/filters/radius_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
 
 #include <pcl/features/normal_3d_omp.h>
@@ -15,6 +16,7 @@
 #include <pcl/surface/gp3.h>
 #include <pcl/surface/marching_cubes_hoppe.h>
 #include <pcl/surface/marching_cubes_rbf.h>
+#include <pcl/surface/mls.h>
 
 #include <pcl/console/time.h>
 #include <pcl/console/parse.h>
@@ -25,11 +27,15 @@ using namespace pcl::console;
 
 int default_mean_k = 200;
 float default_stdev = 0.1f;
+float default_radius = 0.01f;
+int deafult_min_neighbors = 100;
 float default_leaf_size = 0.01f;
 int default_norm_k = 100;
 float default_off_surface_eps = 0.1f;
 int default_grid_res = 50;
 int default_algorithm = 1;
+
+int default_search_radius;
 
 void print_help(char **argv) {
     print_error("Syntax is: %s in.txt out.vtk <options>\n", argv[0]);
@@ -69,7 +75,7 @@ void read_point_cloud(const std::string &fileName, PointCloud<PointXYZ> &cloud) 
 
     while (std::getline(fin, line)) ++num_data_pts;
     print_info("Num of data points: ");
-    print_value("%d\n", num_data_pts);
+    print_value("%d\n\n", num_data_pts);
 
     fin.clear();
     fin.seekg(0, std::ios::beg);
@@ -77,6 +83,7 @@ void read_point_cloud(const std::string &fileName, PointCloud<PointXYZ> &cloud) 
     cloud.width = num_data_pts;
     cloud.height = 1;
     cloud.points.resize(cloud.width * cloud.height);
+    cloud.is_dense = true;
 
     for (int i = 0; i < cloud.width; ++i) {
         float x, y, z;
@@ -112,7 +119,33 @@ void filter_statistical_outlier(PointCloud<PointXYZ> &cloud, int k, float stdev)
     print_value("%g", tt.toc());
     print_info(" ms]\n");
 
-    print_info("Stats filtered cloud is now ");
+    print_info("SOR filtered cloud is now ");
+    print_value("%d\n\n", cloudFiltered->points.size());
+    cloud = *cloudFiltered;
+}
+
+/**
+ * Removes all points that don't have n number of neighbors in an r radius
+ */
+void filter_radius_outlier(PointCloud<PointXYZ> &cloud, float r, int n)
+{
+    PointCloud<PointXYZ>::Ptr cloudFiltered(new PointCloud<PointXYZ>());
+    PointCloud<PointXYZ>::Ptr cloudCopy(new PointCloud<PointXYZ>(cloud));
+
+    RadiusOutlierRemoval<PointXYZ> ror;
+    ror.setInputCloud(cloudCopy);
+    ror.setRadiusSearch(r);
+    ror.setMinNeighborsInRadius(n);
+
+    TicToc tt;
+    tt.tic();
+    print_highlight("Computing RadiusOutlierRemoval ");
+    ror.filter(*cloudFiltered);
+    print_info("[done, ");
+    print_value("%g", tt.toc());
+    print_info(" ms]\n");
+
+    print_info("ROR filtered cloud is now ");
     print_value("%d\n\n", cloudFiltered->points.size());
     cloud = *cloudFiltered;
 }
@@ -137,8 +170,8 @@ void filter_voxel_grid(PointCloud<PointXYZ> &cloud, float size) {
     print_value("%g", tt.toc());
     print_info(" ms]\n");
 
-    print_info("Voxel filtered cloud is now ");
-    print_value("%d\n", cloudFiltered->points.size());
+    print_info("VGF filtered cloud is now ");
+    print_value("%d\n\n", cloudFiltered->points.size());
     cloud = *cloudFiltered;
 }
 
@@ -153,23 +186,46 @@ void normal_estimation(PointCloud<PointXYZ> &cloud, PointCloud<Normal> &cloudNor
     pointTree->setInputCloud(cloudCopy);
 
     unsigned int nthreads = 2;
-    print_info("Running normal estimation on ");
-    print_value("%d", nthreads);
-    print_info(" threads\n");
-
     ne.setNumberOfThreads(nthreads);
     ne.setInputCloud(cloudCopy);
     ne.setSearchMethod(pointTree);
     ne.setKSearch(k);
 
-    TicToc tt3;
-    tt3.tic();
-    print_highlight("Computing normals ");
+    TicToc tt;
+    tt.tic();
+    print_highlight("Computing normals on ");
+    print_value("%d", nthreads);
+    print_info(" threads\n");
     ne.compute(cloudNormals);
     print_info("[done, ");
-    print_value("%g", tt3.toc());
-    print_info(" ms]\n");
+    print_value("%g", tt.toc());
+    print_info(" ms]\n\n");
 }
+
+/*
+void normal_smoothing(PointCloud<PointNormal> &cloud, float r) {
+    search::KdTree<PointNormal>::Ptr tree(new search::KdTree<PointNormal>);
+    PointCloud<PointNormal>::Ptr cloudCopy(new PointCloud<PointNormal>(cloud));
+    PointCloud<PointNormal> cloudSmoothed;
+
+    MovingLeastSquares<PointNormal, PointNormal> mls;
+    mls.setComputeNormals(false);
+    mls.setPolynomialFit(true);
+    mls.setInputCloud(cloudCopy);
+    mls.setSearchMethod(tree);
+    mls.setSearchRadius(r);
+
+    TicToc tt;
+    tt.tic();
+    print_highlight("Smoothing normals ");
+    mls.process(cloudSmoothed);
+    print_info("[done, ");
+    print_value("%g", tt.toc());
+    print_info(" ms]\n");
+
+    cloud = cloudSmoothed;
+}
+*/
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
@@ -202,6 +258,9 @@ int main(int argc, char *argv[]) {
     print_info("Setting a standard deviation of: ");
     print_value("%f\n", stdev);
 
+    float radius = default_radius;
+    int min_neighbors = deafult_min_neighbors;
+
     float leaf_size = default_leaf_size;
     parse_argument(argc, argv, "-leaf_size", leaf_size);
     if (leaf_size <= 0) leaf_size = default_leaf_size;
@@ -214,35 +273,35 @@ int main(int argc, char *argv[]) {
     print_info("Setting a norm k of: ");
     print_value("%d\n", norm_k);
 
+    std::string str_algorithm;
     int algorithm = default_algorithm;
     parse_argument(argc, argv, "-algorithm", algorithm);
     if (algorithm <= 1 || algorithm > 3) {
-        print_info("Selected algorithm: GreedyTriangulation\n");
+        str_algorithm = "GreedyTriangulation";
+    } else if (algorithm == 2) {
+        str_algorithm = "MarchingCubesHoppe";
+    } else if (algorithm == 3) {
+        str_algorithm = "MarchingCubesRBF";
     }
-    else if (algorithm == 2) {
-        print_info("Selected algorithm: MarchingCubesHoppe\n");
-    }
-    else if (algorithm == 3) {
-        print_info("Selected algorithm: MarchingCubesRBF\n");
-    }
+    print_info((std::string("Selected algorithm: ") + str_algorithm).c_str());
+    print_info("\n\n");
 
 
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>());
     read_point_cloud(argv[txt_file_indices[0]], *cloud);
 
     filter_statistical_outlier(*cloud, mean_k, stdev);
+    filter_radius_outlier(*cloud, radius, min_neighbors);
     filter_voxel_grid(*cloud, leaf_size);
 
     PointCloud<Normal>::Ptr cloudNormals(new PointCloud<Normal>());
     normal_estimation(*cloud, *cloudNormals, norm_k);
 
-    /******************************************************************************************************************
-    * SURFACE RECONSTRUCTION
-    ******************************************************************************************************************/
-
     // Concatenate the XYZ and normal fields
     PointCloud<PointNormal>::Ptr cloudWithNormals(new PointCloud<PointNormal>());
     concatenateFields(*cloud, *cloudNormals, *cloudWithNormals);
+
+//    normal_smoothing(*cloudWithNormals, .03f);
 
     // Create k-d search tree that has the points and point normals
     search::KdTree<PointNormal>::Ptr normalTree(new search::KdTree<PointNormal>);
@@ -292,7 +351,7 @@ int main(int argc, char *argv[]) {
 
     TicToc tt4;
     tt4.tic();
-    print_highlight("Computing surface ");
+    print_highlight((std::string("Computing %s ") + str_algorithm).c_str());
     reconstruction->reconstruct(triangles);
     print_info("[done, ");
     print_value("%g", tt4.toc());
