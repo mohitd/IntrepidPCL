@@ -185,17 +185,13 @@ void normal_estimation(PointCloud<PointXYZ> &cloud, PointCloud<Normal> &cloudNor
     search::KdTree<PointXYZ>::Ptr pointTree(new search::KdTree<PointXYZ>);
     pointTree->setInputCloud(cloudCopy);
 
-    unsigned int nthreads = 2;
-    ne.setNumberOfThreads(nthreads);
     ne.setInputCloud(cloudCopy);
     ne.setSearchMethod(pointTree);
     ne.setKSearch(k);
 
     TicToc tt;
     tt.tic();
-    print_highlight("Computing normals on ");
-    print_value("%d", nthreads);
-    print_info(" threads");
+    print_highlight("Computing normals ");
     ne.compute(cloudNormals);
     print_info("[done, ");
     print_value("%g", tt.toc());
@@ -223,6 +219,30 @@ void normal_smoothing(PointCloud<PointNormal> &cloud, float r) {
     print_info(" ms]\n");
 
     cloud = cloudSmoothed;
+}
+
+double cloud_resolution(const PointCloud<PointXYZ>::ConstPtr cloud) {
+    double res = 0.0;
+    int points = 0;
+    int nres;
+    std::vector<int> indices(2);
+    std::vector<float> sq_dist (2);
+    search::KdTree<PointXYZ> tree;
+    tree.setInputCloud(cloud);
+
+    for (size_t i = 0; i < cloud->size(); i++) {
+        nres = tree.nearestKSearch(i, 2, indices, sq_dist);
+        if (nres == 2) {
+            res += sqrt(sq_dist[1]);
+            points++;
+        }
+    }
+
+    if (points != 0) {
+        res /= points;
+    }
+
+    return res;
 }
 
 int main(int argc, char *argv[]) {
@@ -256,6 +276,7 @@ int main(int argc, char *argv[]) {
     print_info("Setting a standard deviation of: ");
     print_value("%f\n", stdev);
 
+    int grid_res = default_grid_res;
     float radius = default_radius;
     int min_neighbors = deafult_min_neighbors;
     float search_radius= default_search_radius;
@@ -293,6 +314,8 @@ int main(int argc, char *argv[]) {
     filter_radius_outlier(*cloud, radius, min_neighbors);
     filter_voxel_grid(*cloud, leaf_size);
 
+    print_info("Cloud \u03C1-bar: "); print_value("%e\n\n", cloud_resolution(cloud));
+
     PointCloud<Normal>::Ptr cloudNormals(new PointCloud<Normal>());
     normal_estimation(*cloud, *cloudNormals, norm_k);
 
@@ -326,7 +349,7 @@ int main(int argc, char *argv[]) {
         case 2: {
             reconstruction = new MarchingCubesHoppe<PointNormal>();
             MarchingCubesHoppe<PointNormal> *hoppe = reinterpret_cast<MarchingCubesHoppe<PointNormal> *>(reconstruction);
-            hoppe->setGridResolution(default_grid_res, default_grid_res, default_grid_res);
+            hoppe->setGridResolution(grid_res, grid_res, grid_res);
             hoppe->setIsoLevel(0);
             hoppe->setPercentageExtendGrid(0);
             break;
@@ -335,7 +358,7 @@ int main(int argc, char *argv[]) {
             reconstruction = new MarchingCubesRBF<PointNormal>();
             MarchingCubesRBF<PointNormal> *rbf = reinterpret_cast<MarchingCubesRBF<PointNormal> *>(reconstruction);
             rbf->setOffSurfaceDisplacement(default_off_surface_eps);
-            rbf->setGridResolution(default_grid_res, default_grid_res, default_grid_res);
+            rbf->setGridResolution(grid_res, grid_res, grid_res);
             rbf->setIsoLevel(0);
             rbf->setPercentageExtendGrid(0);
             break;
@@ -350,7 +373,7 @@ int main(int argc, char *argv[]) {
 
     TicToc tt;
     tt.tic();
-    print_highlight((std::string("Computing %s ") + str_algorithm).c_str());
+    print_highlight((std::string("Computing ") + str_algorithm).c_str());
     reconstruction->reconstruct(triangles);
     print_info("[done, ");
     print_value("%g", tt.toc());

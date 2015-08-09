@@ -19,6 +19,9 @@ target_link_libraries (ttp ${PCL_LIBRARIES})
 add_executable (ptv src/pcd-to-vtk.cpp)
 target_link_libraries (ptv ${PCL_LIBRARIES})
 
+# Generate unit cube in first octant
+add_executable(cube src/cube.cpp)
+
 # Using Marching Cubes to reconstruct a mesh
 add_executable (mcr src/mcr.cpp)
 target_link_libraries (mcr ${PCL_LIBRARIES})
