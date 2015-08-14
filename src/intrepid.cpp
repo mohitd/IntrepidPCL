@@ -29,7 +29,7 @@ using namespace pcl::console;
 int default_mean_k = 200;
 float default_stdev = 0.1f;
 float default_radius = 0.01f;
-int deafult_min_neighbors = 100;
+int default_min_neighbors = 100;
 float default_leaf_size = 0.01f;
 int default_norm_k = 100;
 float default_off_surface_eps = 0.1f;
@@ -50,6 +50,10 @@ void print_help(char **argv) {
 
     print_info("        -leaf_size X = resolution of the cubic grid (VoxelGridFilter) (default: ");
     print_value("%.5f", default_leaf_size);
+    print_info(")\n");
+
+    print_info("        -radius_size X = radius of sphere to check (RadiusOutlierRemoval) (default: ");
+    print_value("%.5f", default_radius);
     print_info(")\n");
 
     print_info("        -norm_k X    = # of neighbors for normal estimation (default: ");
@@ -198,6 +202,9 @@ void normal_estimation(PointCloud<PointXYZ> &cloud, PointCloud<Normal> &cloudNor
     print_info(" ms]\n\n");
 }
 
+/**
+ * Smoothing of the point normals using moving least squares
+ */
 void normal_smoothing(PointCloud<PointNormal> &cloud, float r) {
     search::KdTree<PointNormal>::Ptr tree(new search::KdTree<PointNormal>);
     PointCloud<PointNormal>::Ptr cloudCopy(new PointCloud<PointNormal>(cloud));
@@ -221,6 +228,9 @@ void normal_smoothing(PointCloud<PointNormal> &cloud, float r) {
     cloud = cloudSmoothed;
 }
 
+/**
+ * Computes rho-bar of the point cloud.
+ */
 double cloud_resolution(const PointCloud<PointXYZ>::ConstPtr cloud) {
     double res = 0.0;
     int points = 0;
@@ -264,34 +274,53 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    // k neighbors to search for in StatisticalOutlierRemoval
     int mean_k = default_mean_k;
     parse_argument(argc, argv, "-mean_k", mean_k);
     if (mean_k < 1) mean_k = default_mean_k;
-    print_info("Setting a mean k of: ");
-    print_value("%d\n", mean_k);
+    print_info("Setting a mean k of: "); print_value("%d\n", mean_k);
 
+    // sigma for StatisticalOutlierRemoval
     float stdev = default_stdev;
     parse_argument(argc, argv, "-stdev", stdev);
     if (stdev < 0) stdev = default_stdev;
-    print_info("Setting a standard deviation of: ");
-    print_value("%f\n", stdev);
+    print_info("Setting a standard deviation of: "); print_value("%f\n", stdev);
 
+    // resolution for MarchingCubes
     int grid_res = default_grid_res;
-    float radius = default_radius;
-    int min_neighbors = deafult_min_neighbors;
-    float search_radius= default_search_radius;
+    parse_argument(argc, argv, "-grid_res", grid_res);
+    if (grid_res < 0) grid_res = default_grid_res;
+    print_info("Setting grid resolution: "); print_value("%d\n", grid_res);
 
+    // radius to check for RadiusOutlierRemoval
+    float radius = default_radius;
+    parse_argument(argc, argv, "-radius_size", radius);
+    if (radius <= 0) radius = default_radius;
+    print_info("Setting radius of: "); print_value("%f\n", radius);
+
+    // minimum number of neighbors to check in radius for RadiusOutlierRemoval
+    int min_neighbors = default_min_neighbors;
+    parse_argument(argc, argv, "-min_neighbors", min_neighbors);
+    if (min_neighbors < 1) min_neighbors = default_min_neighbors;
+    print_info("Setting min neighbors: " ); print_value("%d\n", min_neighbors);
+
+    // search radius for MLS normal smoothing
+    float search_radius = default_search_radius;
+    parse_argument(argc, argv, "-search_radius", search_radius);
+    if (search_radius < 0) search_radius = default_search_radius;
+    print_info("Setting search radius: "); print_value("%f\n", search_radius);
+
+    // size of voxels to generate for VoxelGridFilter
     float leaf_size = default_leaf_size;
     parse_argument(argc, argv, "-leaf_size", leaf_size);
     if (leaf_size <= 0) leaf_size = default_leaf_size;
-    print_info("Setting a leaf size of: ");
-    print_value("%f\n", leaf_size);
+    print_info("Setting a leaf size of: "); print_value("%f\n", leaf_size);
 
+    // k neighbors to search for NormalEstimation
     int norm_k = default_norm_k;
     parse_argument(argc, argv, "-norm_k", norm_k);
     if (norm_k < 1) norm_k = default_norm_k;
-    print_info("Setting a norm k of: ");
-    print_value("%d\n", norm_k);
+    print_info("Setting a norm k of: "); print_value("%d\n", norm_k);
 
     std::string str_algorithm("");
     int algorithm = default_algorithm;
@@ -303,8 +332,7 @@ int main(int argc, char *argv[]) {
     } else if (algorithm == 3) {
         str_algorithm = "MarchingCubesRBF";
     }
-    print_info((std::string("Selected algorithm: ") + str_algorithm).c_str());
-    print_info("\n\n");
+    print_info((std::string("Selected algorithm: ") + str_algorithm).c_str()); print_info("\n\n");
 
 
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>());
@@ -375,9 +403,9 @@ int main(int argc, char *argv[]) {
     tt.tic();
     print_highlight((std::string("Computing ") + str_algorithm).c_str());
     reconstruction->reconstruct(triangles);
-    print_info("[done, ");
-    print_value("%g", tt.toc());
-    print_info(" ms]\n");
+    print_info("[done, "); print_value("%g", tt.toc()); print_info(" ms]\n");
+
+    print_info("# polygons: "); print_value("%d\n", triangles.polygons.size());
 
     delete reconstruction;
 
